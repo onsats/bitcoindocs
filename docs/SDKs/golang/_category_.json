@@ -1,0 +1,14 @@
+{
+    "position": 2,
+    "label": "Golang",
+    "collapsible": true,
+    "collapsed": false,
+    "className": "red",
+    "link": {
+      "type": "doc",
+      "id": "golang-intro"
+    },
+    "customProps": {
+      "description": "This description can be used in the swizzled DocCard"
+    }
+  }

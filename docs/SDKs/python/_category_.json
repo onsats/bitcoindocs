@@ -1,0 +1,14 @@
+{
+    "position": 1,
+    "label": "Python",
+    "collapsible": true,
+    "collapsed": false,
+    "className": "red",
+    "link": {
+      "type": "doc",
+      "id": "python-intro"
+    },
+    "customProps": {
+      "description": "This description can be used in the swizzled DocCard"
+    }
+  }
