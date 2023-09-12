@@ -92,7 +92,7 @@ const config = {
               },
               {
                 label: 'Scripts',
-                to: '/docs/scripts',
+                to: '/docs/bitcoin-scripts',
               },
             ],
           },
