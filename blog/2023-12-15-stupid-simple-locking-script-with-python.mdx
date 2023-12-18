@@ -84,7 +84,8 @@ Above code will output a transaction id which you have to **save for later** whe
 
 ## 2. Spend the sats by solving the equation
 
-It's time we solve the stupid simple equation and get our sats back. Our locking script hold the equation and in our unlocking script we must provide the value to solve the equation. Solution so solve the equation is `8`:
+It's time we solve the stupid simple equation and get our sats back. Our locking script holds the equation and in our
+unlocking script we must provide the value to solve the equation. Solution so solve the equation is `8`:
 
 $$
 4 + x = 12 \\\\
@@ -122,6 +123,12 @@ tx.wit = CTxWitness(ctxinwitnesses)
 print("Serialized transaction, ready to be broadcasted: \n{}".format(b2x(tx.serialize())))
 ```
 
+:::info
+Note that in SegWit transactions, the `witness_script` used to lock the address is crucial for unlocking your funds later.
+This script is not publicly visible on the blockchain and is only revealed when you spend the funds. Therefore, it's
+essential to remember or securely store the exact `witness_script` you used initially, as you'll need to provide it to
+unlock and access your funds.
+:::
 
 ## 3. How Execution of This Script Works
 
