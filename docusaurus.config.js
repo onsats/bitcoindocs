@@ -36,7 +36,12 @@ const config = {
     locales: ['en'],
   },
 
-  plugins: ['docusaurus-plugin-sass'],
+  plugins: [
+    'docusaurus-plugin-sass',
+    ['./extensions/sa', {
+      domain: 'sa.bitcoindocs.org'
+    }],
+  ],
 
   presets: [
     [
