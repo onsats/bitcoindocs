@@ -14,6 +14,8 @@ const config = {
   tagline: 'Bitcoin Documentation for Devs',
   favicon: 'img/bitcoin-dev-min.webp',
 
+  staticDirectories: ["static", "assets"],
+
   // Set the production url of your site here
   url: 'https://bitcoindocs.org',
   // Set the /<baseUrl>/ pathname under which your site is served
@@ -89,7 +91,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/bitcoin-dev-min.png',
+      image:  'img/bitcoin-dev-min.webp',
       navbar: {
         title: 'BitcoinDocs',
         logo: {
