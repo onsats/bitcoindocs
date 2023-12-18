@@ -1,0 +1,189 @@
+---
+sidebar_position: 0
+---
+
+import { OpCode, Signature, PublicKey, PublicKeyHash } from "../../src/components/Scripts";
+
+
+# Basics
+
+A Script serves as a set of instructions that accompany each transaction, known as the "locking script." This Script
+dictates how the recipient can access the transferred Bitcoins. It's a stack-based language and is processed
+from left to right.
+
+To access the funds protected by the "locking script," an "unlocking script" is required. The transaction outputs become
+unlocked and spendable only when the combined scripts (unlocking and locking) produce a valid result.
+
+Locking script is more technically known as `scriptPubKey` and unlocking script is refered to as `witness` in SegWit
+transaction and `scriptSig` in non-SegWit transactions.
+
+:::note
+Our focus will be primarily on SegWit transactions (P2WSH and P2WPKH) as non-SegWit transactions (P2SH and P2PKH) are
+becoming less common and have a significant drawback – malleability. This issue is particularly problematic in P2WSH
+transactions.
+:::
+
+Script language encompasses two primary components:
+
+- **Data**: This could be a public key, a signature, a text blob, or any other form of information.
+- **OPCODES**: These are basic constants, commands and functions used within the language.
+
+<!--
+Historically, OPCODES have been a subject of significant debate. Some OPCODES that were present in earlier iterations
+have been deprecated due to their potential risks or harmful nature. New OPCODES are proposed on a regular basis, with
+many currently under discussion.
+-->
+
+You can find an excellent explanations and examples of the following on [learnmeabitcoin.com/technical/script](https://learnmeabitcoin.com/technical/script):
+
+- How Scripts work?
+- What makes a Script valid?
+- Where can you find Scripts in Bitcoin?
+- Why do we use Script?
+- Examples of some standard Scripts
+
+They nicely explain all of the above and we find it difficult to explain it better.
+
+
+## Script Validation 
+
+### Non-SegWit 
+
+Non-SegWit transactions get validated by executing a Bitcoin script which is constructed by joining the `scriptPubKey`
+and `scriptSig` fields, eg: `script = scriptSig + scriptPubKey`.
+
+
+### SegWit 
+
+In SegWit transactions, unlocking funds involves a two-step validation process. First, the transaction checks whether
+the `scriptPubKey` matches the hash of the `witness_script`, confirming the use of the correct `witness_script`. If the
+hash matches, the process then proceeds to execute and validate the Bitcoin script code within the witness. The
+transaction successfully unlocks funds only if this script execution is validated successfully.
+
+It's less crucial to focus on `scriptPubKey` validation if you can correctly construct and execute the Bitcoin script.
+
+:::info
+In non-SegWit transactions, the locking script is openly visible in the `scriptPubKey` field on the blockchain.
+Conversely, in SegWit transactions, the locking script is not directly visible, as it is represented by a hash.
+Therefore, when spending from a SegWit address, you must remember the `witness_script` that was used to lock the funds.
+:::
+
+
+## How is Bitcoin script executed?
+
+Execution of the Script happens on the stack, but before we execute it we need to construct the script.
+
+Script is constructed by joining the `witness_data` and `witness_script`, with the `witness_data` coming first.
+
+`witness_script` = <PublicKey /> <OpCode name="OP_CHECKSIG" /><br/>
+`witness_data` = <Signature /><br/>
+`script = witness_data + witness_script`<br/>
+`script` = <Signature /> <PublicKey /> <OpCode name="OP_CHECKSIG" />
+
+<table>
+    <thead>
+        <th>Stack</th>
+        <th>Script</th>
+        <th>Description</th>
+    </thead>
+    <tbody>
+        <tr>
+            <td style={{ textAlign: "center" }}></td>
+            <td>
+              <Signature />
+              <PublicKey />
+              <OpCode name="OP_CHECKSIG" />
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td style={{ textAlign: "center" }}>
+              <Signature />
+            </td>
+            <td>
+              <PublicKey />
+              <OpCode name="OP_CHECKSIG" />
+            </td>
+            <td>
+              <><Signature /> is added to the stack</>
+            </td>
+        </tr>
+        <tr>
+            <td style={{ textAlign: "center" }}>
+              <PublicKey />
+              <br/>
+              <Signature />
+            </td>
+            <td>
+              <OpCode name="OP_CHECKSIG" />
+            </td>
+            <td>
+              <><PublicKey /> is added to the stack</>
+            </td>
+        </tr>
+        <tr>
+            <td style={{ textAlign: "center" }}>1</td>
+            <td></td>
+            <td>
+              <><OpCode name="OP_CHECKSIG" /> checks the signature for the top two stack items</>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+:::info
+Above script is actually a script used for P2PKH (non-segwit). It's not really useful to use it in production.
+:::
+
+<!-- THIS IS FOR P2PKH and we wish to primarly discuss segwit transactions on this page ...
+## How to get the locking script aka. scriptPubKey?
+
+Using `bitcoin-cli` you can look at the locking script by fetching a raw transaction and looking at the `vout` field.
+
+This is how you can get a raw transaction.
+
+```bash
+$ bitcoin-cli getrawtransaction <transaction id> 2
+```
+
+In this example we only extract the `vout` field:
+
+```bash
+$ bitcoin-cli getrawtransaction c34798e099c08bd543cb09ff584d7e3aa890c0f077dc30726226805199d5f4c5 2 | jq '.vout'
+[
+  {
+    "value": 0.00096761,
+    "n": 0,
+    "scriptPubKey": {
+      "asm": "OP_DUP OP_HASH160 1e55cbefb08c593f6cf3227ef00fea4c8415fad7 OP_EQUALVERIFY OP_CHECKSIG",
+      "desc": "addr(13mQ41XHghPKosyjwpHNPmWTPjSkQA3SKj)#wgq6gmvd",
+      "hex": "76a9141e55cbefb08c593f6cf3227ef00fea4c8415fad788ac",
+      "address": "13mQ41XHghPKosyjwpHNPmWTPjSkQA3SKj",
+      "type": "pubkeyhash"
+    }
+  },
+  {
+    "value": 0.0098774,
+    "n": 1,
+    "scriptPubKey": {
+      "asm": "0 ec6a3a46be774958cca64a39d456e8d99bb48c4f",
+      "desc": "addr(bc1qa34r5347way43n9xfguag4hgmxdmfrz0juk2a7)#tnkprd53",
+      "hex": "0014ec6a3a46be774958cca64a39d456e8d99bb48c4f",
+      "address": "bc1qa34r5347way43n9xfguag4hgmxdmfrz0juk2a7",
+      "type": "witness_v0_keyhash"
+    }
+  }
+]
+```
+
+The script for the scriptPubKey (locking script) can be most human-readable by checking the `asm` field. You can also
+see the `type` of the scriptPubKey that was used in case it was a standard one.
+
+## How to construct an unlocking script?
+
+The way you structure scriptSig depends on the scriptPubKey: you need to use the right key to unlock and spend the output
+of a transaction. 
+
+
+## How to construct a transaction?
+-->

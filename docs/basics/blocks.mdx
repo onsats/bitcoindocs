@@ -4,6 +4,17 @@ sidebar_position: 1
 
 # Blocks
 
-import HelpWanted from "../_help-needed.mdx";
+A block in the Bitcoin blockchain is like a page in a ledger or a record book. It contains a list of transactions that
+have been verified and added to the blockchain.
 
-<HelpWanted />
+Apart from transaction data, each block also contains a block header which consits of:
+
+- **version**: version number
+- **hash of previous block**: hash of the previous block header
+- **merkle root**: merkle root of the transactions included in the block
+- **timestamp**: epoch timestamp of the block
+- **bits**: network target difficulty
+- **nonce**: random value generated during the process of mining which must match certain criteria
+
+At the time of writting Bitcoin had **807752** blocks. You can see the number increase by querying your Bitcoin node or use
+[public Bitcoin explorer](https://mempool.space/blocks).

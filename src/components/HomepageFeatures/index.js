@@ -31,7 +31,7 @@ const FeatureList = [
     // Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Become a part of a community pushing the boundaries of Bitcoin's potential. Collaborate, innovate, and shape
+        Become a part of a community pushing the boundaries of Bitcoin. Collaborate, innovate, and shape
         the future of decentralized finance with fellow visionaries.
       </>
     ),
