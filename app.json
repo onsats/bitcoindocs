@@ -1,0 +1,9 @@
+{
+    "scripts": {
+        "dokku": {
+            "predeploy": "npm run build",
+            "postdeploy": "echo 'Deployment complete'"
+        }
+    }
+  }
+  
