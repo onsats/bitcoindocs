@@ -270,7 +270,7 @@ Serialized transaction, ready to be broadcasted:
 
 You can broadcast the serialized transaction using `./bitcoin-cli sendrawtransaction`
 
-## 3. How Execution of This Script Works
+## 3. How Script Execution Works
 
 Walkthrough of how our script is executed. We will cover both scenarios:
 
@@ -598,7 +598,7 @@ btcdeb '[sig2 pub2 0x73757065722073656372657420636f6465 1 OP_IF OP_SHA256 sha256
 ### 3.2. Falsy Path
 
 Our goal is to spend from the "falsy" path, meaning we want to do validation based on the data inside the ELSE statement.
-To make sure we fall into it, we will need `OP_IF` to resolve to `false``. We achieve this by adding `0` before `OP_IF`.
+To make sure we fall into it, we will need `OP_IF` to resolve to `false`. We achieve this by adding `0` before `OP_IF`.
 
 In Python code, using the `python-bitcoinlib` we can do this by passing in an empty byte (eg: `b''`).
 
