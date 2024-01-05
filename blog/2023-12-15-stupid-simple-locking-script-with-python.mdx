@@ -175,8 +175,8 @@ Full script consists of **unlocking** (`4`) + **locking script** (`4 OP_ADD 12 O
 +----------+-------+
 |  Script  | Stack |
 +----------+-------+
-| OP_ADD   |  04   |
-| 12       |  04   | another 4 gets added to the stack
+| OP_ADD   |  04   | another 4 gets added to the stack
+| 12       |  04   | 
 | OP_EQUAL |       |
 +----------+-------+
 
@@ -194,8 +194,8 @@ Full script consists of **unlocking** (`4`) + **locking script** (`4 OP_ADD 12 O
 +----------+-------+
 |  Script  | Stack |
 +----------+-------+
-| OP_EQUAL |  08   |
-|          |  12   | 12 gets added to the stack
+| OP_EQUAL |  12   | 12 gets added to the stack
+|          |  08   |
 +----------+-------+
 
 ---
@@ -245,8 +245,8 @@ Full script consists of **unlocking** (`8`) + **locking script** (`4 OP_ADD 12 O
 +----------+-------+
 |  Script  | Stack |
 +----------+-------+
-| OP_ADD   |  08   |
-| 12       |  04   | 4 gets added to the stack
+| OP_ADD   |  04   | 4 gets added to the stack
+| 12       |  08   |
 | OP_EQUAL |       |
 +----------+-------+
 
@@ -264,8 +264,8 @@ Full script consists of **unlocking** (`8`) + **locking script** (`4 OP_ADD 12 O
 +----------+-------+
 |  Script  | Stack |
 +----------+-------+
-| OP_EQUAL |  12   |
-|          |  12   | 12 gets aded to the stack
+| OP_EQUAL |  12   | 12 gets aded to the stack
+|          |  12   |
 +----------+-------+
 
 ---

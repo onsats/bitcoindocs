@@ -18,7 +18,7 @@ import FeaturedImage from '@site/assets/How-To-Construct-an-HTLC-Contract-and-Ho
 
 <img src={FeaturedImage} alt="featured image" style={{ width: "100%" }} />
 
-[HTLC contracts](../docs/bitcoin-scripts/HTLC) are a conditional contracts that can be spent in two ways:
+[HTLC contracts](/docs/bitcoin-scripts/HTLC) are a conditional contracts that can be spent in two ways:
 
 - after some number of blocks have been mined
 - after revealing a secret code
@@ -51,7 +51,7 @@ To follow along you must:
 - install [python-bitcoinlib](https://pypi.org/project/python-bitcoinlib/) library for Python code
 
 
-## 1. Construct an HTLC contract
+## 1. Construct an HTLC Contract
 
 ```py
 import hashlib
@@ -174,7 +174,7 @@ $ ./bitcoin-cli generatetoaddress 10 bcrt1q5rgmcrtg0zt63fk5h9efls6q26d86lszw25kl
 ```
 
 
-## 2.1. Spend via preimage path
+## 2.1. Spend via Preimage Path
 
 You can spend via preimage path after at least 1 block confirmed in our HTLC address so make sure you've followed the
 previous section on how to do that. :)
@@ -220,7 +220,7 @@ Serialized transaction, ready to be broadcasted:
 
 You can broadcast the serialized transaction using `./bitcoin-cli sendrawtransaction`
 
-## 2.2. Spend after 10 block confirmation path
+## 2.2. Spend After 10 Block Confirmations
 
 If you want to spend the funds using this approach you have to make sure that enough blocks have been mined sinced
 the transaction has been added into a block. We write about how to do this at the end of the
@@ -267,3 +267,605 @@ Serialized transaction, ready to be broadcasted:
 ```
 
 You can broadcast the serialized transaction using `./bitcoin-cli sendrawtransaction`
+
+## 3. How Execution of This Script Works
+
+Walkthrough of how our script is executed. We will cover both scenarios:
+
+- **truthy**: inside the IF statement, where receiver spends using the preimage
+- **falsy**: inside the ELSE statment, where sender spends after 10 confirmations
+
+### 3.1. Truthy Path
+
+This is our redeem_script (aka locking script):
+
+```
+OP_IF
+    OP_SHA256 preimage OP_EQUALVERIFY OP_DUP OP_HASH160 Hash160(pubkey_recipient)
+OP_ELSE
+    10 OP_CHECKSEQUENCEVERIFY OP_DROP OP_DUP OP_HASH160 Hash160(pubkey_sender)
+OP_ENDIF
+OP_EQUALVERIFY
+OP_CHECKSIG
+```
+
+Our goal is to spend from the "truthy" path, meaning we want to do validation based on the data inside the IF statement.
+To make sure we fall into it, we will need `OP_IF` to resolve to `true``. We achieve this by adding `1` before `OP_IF`.
+
+In Python code, using the `python-bitcoinlib` we must pass in bytes (eg: `b'x01'`) instead of an int `1` value.
+
+So `1` will make us go into the truthy path, which means the script we need to satisfy is essentially:
+
+```py
+OP_SHA256 preimage OP_EQUALVERIFY OP_DUP OP_HASH160 Hash160(pubkey_recipient) OP_EQUALVERIFY OP_CHECKSIG
+```
+
+By observer the above code we can deduce that other things that need to be provided in the unlocking script are:
+
+- preimage secret (`OP_EQUALVERIFY` after `preimage` and before `OP_SHA256` indicates that)
+- recipients public key (`OP_EQUALVERIFY` after `Hash160(pubkey_recipient)` indicates that)
+- a signature of the transaction (`OP_CHECKSIG` indicates that)
+
+So the whole script should look like:
+
+```
+<signature>
+<recipient_public_key>
+<preimage_secret>
+1
+OP_IF
+    OP_SHA256 preimage OP_EQUALVERIFY OP_DUP OP_HASH160 Hash160(pubkey_recipient)
+OP_ELSE
+    10 OP_CHECKSEQUENCEVERIFY OP_DROP OP_DUP OP_HASH160 Hash160(pubkey_sender)
+OP_ENDIF
+OP_EQUALVERIFY
+OP_CHECKSIG
+```
+
+This is our full script:
+
+```
+signature receiver_public_key preimage_secret 1 OP_IF OP_SHA256 preimage OP_EQUALVERIFY OP_DUP OP_HASH160 hash160(receiver_public_key) OP_ELSE 10 OP_CHECKSEQUENCEVERIFY OP_DROP OP_DUP OP_HASH160 hash160(sender_public_key) OP_ENDIF OP_EQUALVERIFY OP_CHECKSIG
+```
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| signature                    |                              | 
+| receiver_public_key          |                              | 
+| preimage_secret              |                              |
+| 1                            |                              |
+| OP_IF                        |                              |
+| OP_SHA256                    |                              |
+| preimage                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_ELSE                      |                              |
+| 10                           |                              |
+| OP_CHECKSEQUENCEVERIFY       |                              |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_ENDIF                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| receiver_public_key          | signature                    | signature gets added to stack
+| preimage_secret              |                              |
+| 1                            |                              |
+| OP_IF                        |                              |
+| OP_SHA256                    |                              |
+| preimage                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_ELSE                      |                              |
+| 10                           |                              |
+| OP_CHECKSEQUENCEVERIFY       |                              |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_ENDIF                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| preimage_secret              | receiver_public_key          | receiver_public_key gets added to stack
+| 1                            | signature                    |
+| OP_IF                        |                              |
+| OP_SHA256                    |                              |
+| preimage                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_ELSE                      |                              |
+| 10                           |                              |
+| OP_CHECKSEQUENCEVERIFY       |                              |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_ENDIF                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+--
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| 1                            | preimage_secret              | preimage_secret get added to s tack
+| OP_IF                        | receiver_public_key          |
+| OP_SHA256                    | signature                    |
+| preimage                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_ELSE                      |                              |
+| 10                           |                              |
+| OP_CHECKSEQUENCEVERIFY       |                              |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_ENDIF                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+--
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_IF                        | 1                            | 1 gets added to stack
+| OP_SHA256                    | preimage_secret              |
+| preimage                     | receiver_public_key          |
+| OP_EQUALVERIFY               | signature                    |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_ELSE                      |                              |
+| 10                           |                              |
+| OP_CHECKSEQUENCEVERIFY       |                              |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_ENDIF                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+--
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_SHA256                    | preimage_secret              | `OP_IF` is executed and because 1 was on top of the stack, it goes into truthy path and pops the top stack item
+| preimage                     | receiver_public_key          |
+| OP_EQUALVERIFY               | signature                    |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+--
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| preimage                     | OP_SHA256(preimage_secret)   | `OP_SHA256` hashed the top most item
+| OP_EQUALVERIFY               | receiver_public_key          |
+| OP_DUP                       | signature                    |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+--
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_EQUALVERIFY               | preimage                     | preimage gets added to stack
+| OP_DUP                       | OP_SHA256(preimage_secret)   |
+| OP_HASH160                   | receiver_public_key          |
+| hash160(receiver_public_key) | signature                    |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+--
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_DUP                       | receiver_public_key          | `OP_EQUALVERIFY` checks the top two stack items and if they match returns 1 otherwise it errors. The top stack is popped afterwords
+| OP_HASH160                   | signature                    |
+| hash160(receiver_public_key) |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+--
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_HASH160                   | receiver_public_key          | `OP_DUP` duplicates the top stack item
+| hash160(receiver_public_key) | receiver_public_key          |
+| OP_EQUALVERIFY               | signature                    |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+--
+
+```
++------------------------------+---------------------------------+
+|           Script             |            Stack                |
++------------------------------+---------------------------------+
+| hash160(receiver_public_key) | OP_HASH160(receiver_public_key) | `OP_HASH160` is ran on the top stack item
+| OP_EQUALVERIFY               | receiver_public_key             |
+| OP_CHECKSIG                  | signature                       |
++------------------------------+---------------------------------+
+```
+
+--
+
+```
++------------------------------+---------------------------------+
+|           Script             |            Stack                |
++------------------------------+---------------------------------+
+| OP_EQUALVERIFY               | hash160(receiver_public_key)    | hash160(receiver_public_key) gets added to stack
+| OP_CHECKSIG                  | OP_HASH160(receiver_public_key) |
+|                              | receiver_public_key             |
+|                              | signature                       |
++------------------------------+---------------------------------+
+```
+
+--
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_CHECKSIG                  | receiver_public_key          | `OP_EQUALVERIFY` checks the top two stack items and if they match returns 1 otherwise it errors. The top stack is popped afterwords
+|                              | signature                    |
++------------------------------+------------------------------+
+```
+
+--
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+|                              | 1                            | `OP_CHECKSIG` check the top two stack items if the public key matches the signature. If it is valid, 1 is returned, 0 otherwise.
++------------------------------+------------------------------+
+```
+
+#### btcdeb execution:
+
+```
+btcdeb '[sig2 pub2 0x73757065722073656372657420636f6465 1 OP_IF OP_SHA256 sha256(0x73757065722073656372657420636f6465) OP_EQUALVERIFY OP_DUP OP_HASH160 hash160(pub2) OP_ELSE 10 OP_CHECKSEQUENCEVERIFY OP_DROP OP_DUP OP_HASH160 hash160(pub1) OP_ENDIF OP_EQUALVERIFY OP_CHECKSIG]'  --pretend-valid=sig2:pub2
+```
+
+### 3.2. Falsy Path
+
+Our goal is to spend from the "falsy" path, meaning we want to do validation based on the data inside the ELSE statement.
+To make sure we fall into it, we will need `OP_IF` to resolve to `false``. We achieve this by adding `0` before `OP_IF`.
+
+In Python code, using the `python-bitcoinlib` we can do this by passing in an empty byte (eg: `b''`).
+
+So `b''` will make us go into the falsy path, which means the script we need to satisfy is essentially:
+
+```py
+10 OP_CHECKSEQUENCEVERIFY OP_DROP OP_DUP OP_HASH160 Hash160(pubkey_sender) OP_EQUALVERIFY OP_CHECKSIG
+```
+
+By observer the above code we can deduce that other things that need to be provided in the unlocking script are:
+
+- 10 blocks need to be mined before spending (`10 OP_CHECKSEQUENCEVERIFY` indicates that)
+- recipients public key (`OP_EQUALVERIFY` after `Hash160(pubkey_recipient)` indicates that)
+- a signature of the transaction (`OP_CHECKSIG` indicates that)
+
+So the whole script should look like:
+
+```
+<signature>
+<sender_public_key>
+0
+OP_IF
+    OP_SHA256 preimage OP_EQUALVERIFY OP_DUP OP_HASH160 Hash160(pubkey_recipient)
+OP_ELSE
+    10 OP_CHECKSEQUENCEVERIFY OP_DROP OP_DUP OP_HASH160 Hash160(pubkey_sender)
+OP_ENDIF
+OP_EQUALVERIFY
+OP_CHECKSIG
+```
+
+This is our full script:
+
+```
+signature receiver_public_key preimage_secret 1 OP_IF OP_SHA256 preimage OP_EQUALVERIFY OP_DUP OP_HASH160 hash160(receiver_public_key) OP_ELSE 10 OP_CHECKSEQUENCEVERIFY OP_DROP OP_DUP OP_HASH160 hash160(sender_public_key) OP_ENDIF OP_EQUALVERIFY OP_CHECKSIG
+```
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| signature                    |                              | 
+| sender_public_key            |                              | 
+| 0                            |                              |
+| OP_IF                        |                              |
+| OP_SHA256                    |                              |
+| preimage                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_ELSE                      |                              |
+| 10                           |                              |
+| OP_CHECKSEQUENCEVERIFY       |                              |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_ENDIF                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| sender_public_key            | signature                    | signature gets added to stack
+| 0                            |                              |
+| OP_IF                        |                              |
+| OP_SHA256                    |                              |
+| preimage                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_ELSE                      |                              |
+| 10                           |                              |
+| OP_CHECKSEQUENCEVERIFY       |                              |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_ENDIF                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| 0                            | sender_public_key            | sender_public_key gets added to stack
+| OP_IF                        | signature                    |
+| OP_SHA256                    |                              |
+| preimage                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_ELSE                      |                              |
+| 10                           |                              |
+| OP_CHECKSEQUENCEVERIFY       |                              |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_ENDIF                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_IF                        | 0                            | 0 gets added to stack
+| OP_SHA256                    | sender_public_key            |
+| preimage                     | signature                    |
+| OP_EQUALVERIFY               |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(receiver_public_key) |                              |
+| OP_ELSE                      |                              |
+| 10                           |                              |
+| OP_CHECKSEQUENCEVERIFY       |                              |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_ENDIF                     |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| 10                           | sender_public_key            | `OP_IF` is executed, and because 0 was on top of the stack, it goes into the falsy path and pops the top stack item
+| OP_CHECKSEQUENCEVERIFY       | signature                    |
+| OP_DROP                      |                              |
+| OP_DUP                       |                              |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_CHECKSEQUENCEVERIFY       | 10                           | 10 gets added to stack
+| OP_DROP                      | sender_public_key            |
+| OP_DUP                       | signature                    |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_DROP                      | sender_public_key            | `OP_CHECKSEQUENCEVERIFY` check if the relative lock time of the input is not equal to or longer than the value of the top stack item. If it's not it marks transaction as invalid.
+| OP_DUP                       | signature                    |
+| OP_HASH160                   |                              |
+| hash160(sender_public_key)   |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_DUP                       | sender_public_key            | `OP_DROP` removes the top stack item
+| OP_HASH160                   | signature                    |
+| hash160(sender_public_key)   |                              |
+| OP_EQUALVERIFY               |                              |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+| OP_HASH160                   | sender_public_key            | `OP_DUP` duplicates the top stack item
+| hash160(sender_public_key)   | sender_public_key            |
+| OP_EQUALVERIFY               | signature                    |
+| OP_CHECKSIG                  |                              |
++------------------------------+------------------------------+
+
+```
+
+---
+
+```
++------------------------------+---------------------------------+
+|           Script             |            Stack                |
++------------------------------+---------------------------------+
+| hash160(sender_public_key)   | OP_HASH160(sender_public_key)   | `OP_HASH160` is run on the top stack item (duplicated receiver_public_key)
+| OP_EQUALVERIFY               | sender_public_key               |
+| OP_CHECKSIG                  | signature                       |
++------------------------------+---------------------------------+
+```
+
+---
+
+```
++------------------------------+---------------------------------+
+|           Script             |            Stack                |
++------------------------------+---------------------------------+
+| OP_EQUALVERIFY               | hash160(sender_public_key)      | hash160(sender_public_key) is added to stack
+| OP_CHECKSIG                  | OP_HASH160(receiver_public_key) |
+|                              | sender_public_key               |
+|                              | signature                       |
++------------------------------+---------------------------------+
+```
+
+---
+
+```
++------------------------------+---------------------------------+
+|           Script             |            Stack                |
++------------------------------+---------------------------------+
+| OP_CHECKSIG                  | sender_public_key               | `OP_EQUALVERIFY` checks the top two stack items and if they match returns 1 otherwise it errors. The top stack is popped afterwords
+|                              | signature                       |
++------------------------------+---------------------------------+
+```
+
+---
+
+```
++------------------------------+------------------------------+
+|           Script             |            Stack             |
++------------------------------+------------------------------+
+|                              | 1                            | `OP_CHECKSIG` check the top two stack items if the public key matches the signature. If it is valid, 1 is returned, 0 otherwise.
++------------------------------+------------------------------+
+```
+
+#### btcdeb execution:
+
+```
+btcdeb '[sig1 pub1 0x73757065722073656372657420636f6465 0 OP_IF OP_SHA256 sha256(0x73757065722073656372657420636f6465) OP_EQUALVERIFY OP_DUP OP_HASH160 hash160(pub2) OP_ELSE 10 OP_CHECKSEQUENCEVERIFY OP_DROP OP_DUP OP_HASH160 hash160(pub1) OP_ENDIF OP_EQUALVERIFY OP_CHECKSIG]'  --pretend-valid=sig2:pub2
+```
