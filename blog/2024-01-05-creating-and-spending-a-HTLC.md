@@ -292,7 +292,7 @@ OP_CHECKSIG
 ```
 
 Our goal is to spend from the "truthy" path, meaning we want to do validation based on the data inside the IF statement.
-To make sure we fall into it, we will need `OP_IF` to resolve to `true``. We achieve this by adding `1` before `OP_IF`.
+To make sure we fall into it, we will need `OP_IF` to resolve to `true`. We achieve this by adding `1` before `OP_IF`.
 
 In Python code, using the `python-bitcoinlib` we must pass in bytes (eg: `b'x01'`) instead of an int `1` value.
 
