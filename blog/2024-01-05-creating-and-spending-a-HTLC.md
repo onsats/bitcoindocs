@@ -14,7 +14,7 @@ import FeaturedImage from '@site/assets/How-To-Construct-an-HTLC-Contract-and-Ho
 
 <Head>
   <meta property="og:image" content={`https://bitcoindocs.org${FeaturedImage}`} />
-  <meta name="twitter:image:src" content="https://bitcoindocs.org${FeaturedImage}">
+  <meta name="twitter:image:src" content="https://bitcoindocs.org${FeaturedImage}" />
   <meta property="og:image:type" content="image/jpeg" />
 </Head>
 
