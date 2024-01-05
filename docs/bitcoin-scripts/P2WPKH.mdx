@@ -4,7 +4,18 @@ sidebar_position: 4
 
 # P2WPKH
 
-Pay to Witness Public Key Hash is a native Segwit version of a P2PKH.
+P2WPKH stands for "Pay to Witness Public Key Hash". It's a native Segwit version of a P2PKH (Pay to Public Key Hash)
+which securing Bitcoins to a hash of recipient's public key (address).
+
+Compared to now mostly deprecated P2PKH, P2WPKH is more efficient and requires less data to be stored on the Bitcoin
+blockchain. It's part of an upgrade called Segregated Witness (or SegWit). In P2WPKH transactions, the witness data
+(like the digital signature) is separated (or 'segregated') from the main part of the transaction. This makes
+transactions smaller in size, which means more transactions can fit into a single block on the blockchain, improving
+the network's capacity as well as fixies a [malleability](https://en.bitcoin.it/wiki/Transaction_malleability) issue.
+
+import MalleabilityInfo from "./_malleability.mdx"
+
+<MalleabilityInfo />
 
 import HelpWanted from "../_help-needed.mdx";
 

@@ -2,10 +2,42 @@
 sidebar_position: 6
 ---
 
-# HTLC 
+Hash Time Locked Contract (HTLC) is a conditional payment that can be spent in two ways:
 
-Hashed Timelock Contract leverages script hash to produce conditional payments.
+- by the sender (the person who locked the funds in) can unlock them after some number of blocks have been mined
+- by the receiver (the person whom the funds are intended for), when he received a revealed secret code that only sender knows
 
-import HelpWanted from "../_help-needed.mdx";
+There are different ways one can construct an HTLC, here's one simple example.
 
-<HelpWanted />
+```
+OP_IF
+    OP_SHA256 <preimage> OP_EQUALVERIFY OP_DUP OP_HASH160 Hash160(<recipientpubkey>)
+OP_ELSE
+    <10> OP_CHECKSEQUENCEVERIFY OP_DROP OP_DUP OP_HASH160 Hash160(<senderpubkey>)
+OP_ENDIF
+OP_EQUALVERIFY
+OP_CHECKSIG
+```
+
+We have a guide [how to contruct the above HTLC contract and how to spend from it](/notes/how-to-construct-an-htlc-conract-and-spend-it).
+
+:::warning
+Above script is not really the best to use in production. One problem is that after the 10 block confirmation
+both recipient and sender can spend the funds, which usually isn't desirabled.
+:::
+
+
+## HTLC usecases?
+
+1. **Atomic Swaps**: Allow for the exchange of one cryptocurrency for another without needing a trusted third party. This is
+crucial for decentralized exchanges and cross-chain transactions.
+2. **Payment Channels and Lightning Network**: These channels facilitate instant, high-volume microtransactions, which are a
+cornerstone of the Lightning Network. This helps to scale blockchain networks by taking numerous small transactions off-chain.
+3. **Conditional Payments**: The funds are locked in the contract and can only be released if specific conditions are met,
+typically proven by providing a cryptographic hash.
+4. **Cross-Chain Interoperability**: Facilitate interoperability between different blockchain networks, allowing for
+the transfer of assets and information across chains in a secure and trustless manner.
+5. **Escrow Services**: They can be used for creating decentralized escrow services, where funds are locked until all
+parties fulfill their contractual obligations.
+6. **Time-Bound Transactions**: They can enforce time-bound conditions on transactions, meaning that if a certain
+condition is not met within a specified timeframe, the funds are returned to the sender.

@@ -4,7 +4,19 @@ sidebar_position: 5
 
 # P2WSH
 
-Pay to Witness Script Hash is a native Segwit version of a P2SH.
+P2WSH stands for "Pay to Witness Script Hash". It's a native Segwit version of a P2SH which allows for more complex
+conditions on how Bitcoins can be spent.
+
+P2WSH is a more efficient approach for handling complex Bitcoin transactions compared to P2SH. It's an integral part of
+the Segregated Witness (SegWit) upgrade. In P2WSH transactions, the script's witness data — which includes things like
+digital signatures and the actual script conditions — is segregated from the main transaction data. This separation
+significantly reduces the size of the transaction, allowing more transactions to be included in a single block on the
+Bitcoin blockchain. This not only improves the network's overall capacity but also addresses the transaction
+malleability issue, enhancing the security and reliability of multi-signature and other complex transaction types.
+
+import MalleabilityInfo from "./_malleability.mdx"
+
+<MalleabilityInfo />
 
 import HelpWanted from "../_help-needed.mdx";
 
