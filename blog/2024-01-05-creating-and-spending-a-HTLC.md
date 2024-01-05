@@ -585,7 +585,7 @@ signature receiver_public_key preimage_secret 1 OP_IF OP_SHA256 preimage OP_EQUA
 +------------------------------+------------------------------+
 |           Script             |            Stack             |
 +------------------------------+------------------------------+
-|                              | 1                            | `OP_CHECKSIG` check the top two stack items if the public key matches the signature. If it is valid, 1 is returned, 0 otherwise.
+|                              | 1                            | `OP_CHECKSIG` checks the top two stack items if the public key matches the signature. If it is valid, 1 is returned, 0 otherwise.
 +------------------------------+------------------------------+
 ```
 
@@ -862,7 +862,7 @@ signature receiver_public_key preimage_secret 1 OP_IF OP_SHA256 preimage OP_EQUA
 +------------------------------+------------------------------+
 |           Script             |            Stack             |
 +------------------------------+------------------------------+
-|                              | 1                            | `OP_CHECKSIG` check the top two stack items if the public key matches the signature. If it is valid, 1 is returned, 0 otherwise.
+|                              | 1                            | `OP_CHECKSIG` checks the top two stack items if the public key matches the signature. If it is valid, 1 is returned, 0 otherwise.
 +------------------------------+------------------------------+
 ```
 
