@@ -6,7 +6,7 @@ authors:
   - name: katsu
     url: https://twitter.com/0x0ff_
     image_url: https://avatars.githubusercontent.com/u/77497807?v=4
-tags: [bitcoin-script, beginner, python, htlc]
+tags: [bitcoin-script, intermediate, python, htlc]
 hide_table_of_contents: false
 ---
 
