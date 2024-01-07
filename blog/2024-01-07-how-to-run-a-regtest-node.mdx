@@ -1,0 +1,204 @@
+---
+title: How To Run a Bitcoin Regtest Node
+description: Learn how to run a Bitcoin regtest node!
+slug: how-to-run-a-bitcoin-regtest-node
+authors:
+  - name: katsu
+    url: https://twitter.com/0x0ff_
+    image_url: https://avatars.githubusercontent.com/u/77497807?v=4
+tags: [beginner]
+hide_table_of_contents: false
+---
+
+import FeaturedImage from '@site/assets/How-To-Run-a-Bitcoin-Regtest-Node.jpg';
+
+<Head>
+  <meta property="og:image" content={`https://bitcoindocs.org${FeaturedImage}`} />
+  <meta name="twitter:image:src" content="https://bitcoindocs.org${FeaturedImage}" />
+  <meta property="og:image:type" content="image/jpeg" />
+</Head>
+
+<img src={FeaturedImage} alt="featured image" style={{ width: "100%" }} />
+
+A regtest node is a Bitcoin node running regtest network. Usually it is ran locally and is useful because
+you control when a block get mined which is useful when testing, debugging or developing things.
+
+<!--truncate-->
+
+In this example we show hot to run a regtest node using binaries provided by Bitcoin core. We will not cover howto build
+your own binaries as that would be an entirely separate guide of itself.
+
+Let's dive in!
+
+## 1. Download Binaries
+
+1. Download Latest Bitcoin core: https://bitcoincore.org/en/download/
+2. untar.gz them: `tar -xzf <downloaded file>.tar.gz`
+3. move the uncompressed `bitcoin-xx.x` directory into whichever directory you want (eg: ~/projects/bitcoin/bitcoin-xx.x) and cd into it
+
+
+## 2. Config
+
+1. In your home directory create a `.bitcoin` dir: `mkdir ~/.bitcoin`
+2. Create a `bitcoin.conf` file: `touch bitcoin.conf`
+3. Add the follwing settings to the `bitcoin.conf` file:
+
+```ini
+server=1
+regtest=1
+
+txindex=1
+
+[regtest]
+rpcuser=secret-user
+rpcpassword=secret-password
+rpcbind=127.0.0.1
+rpcport=18443
+```
+
+## 3. Run It
+
+Go back into your uncompressed bitcoin directory, the one from step 1 and cd into the `bin` directory. All the binary
+files live there.
+
+Start the bitcoin process: `./bitcoind`
+
+This will not run the process in the background. If you want to run bitcoind as a backround process you need to run in
+daemon mode which you can do by adding daemon=1 into the `~/.bitcoin/bitcoin.conf` file or by starting the process with
+the `-daemon` flag (eg. `./bitcoind -daemon`).
+
+## 4. Play with bitcoin-cli
+
+Run `./bitcoin-cli help` for overview of available commands.
+
+If you ran the bitcoin process in daemon mode, you can sto is by running `./bitcoin-cli stop`
+
+### Wallet
+
+#### createwallet
+
+In order to create addresses and send sats you need to create a wallet.
+
+```sh
+$ ./bitcoin-cli createwallet <wallet name>
+```
+
+```sh
+$ ./bitcoin-cli createwallet first_wallet
+```
+
+#### loadwallet
+
+Every time you start the bitcoin process it will start without a wallet. Upon start you have to load the wallet.
+
+```sh
+$ ./bitcoin-cli loadwallet <wallet name>
+```
+
+```sh
+$ ./bitcoin-cli loadwallet first_wallet
+```
+
+#### unloadwallet
+
+Unload the currently loaded wallet.
+
+```sh
+$ ./bitcoin-cli unloadwallet
+```
+
+```sh
+$ ./bitcoin-cli unloadwallet
+```
+
+#### getnewaddress
+
+Returns a new address for receiving funds
+
+```sh
+$ ./bitcoin-cli getnewaddress <label> <address_type>
+```
+
+```sh
+$ ./bitcoin-cli getnewaddress "first address"
+```
+
+Address type is an optional field.
+
+
+#### sendtoaddress
+
+Returns a new address for receiving funds
+
+```sh
+$ ./bitcoin-cli sendtoaddress <address> <amount>
+```
+
+```sh
+$ ./bitcoin-cli sendtoaddress bcrt1qkctscz9recalk3ar8gl9f59syj5ffs3zey35s5vhkaw6xgmacc7sk5wwh3 0.69
+```
+
+### Mining blocks
+
+#### generatetoaddress
+
+Mines a block and sends funds to a given address.
+
+```sh
+$ ./bitcoin-cli generatetoaddress <nr of blocks> <address>
+```
+
+```sh
+$ ./bitcoin-cli generatetoaddress 10 bcrt1q5rgmcrtg0zt63fk5h9efls6q26d86lszw25kl2 
+```
+
+### Transactions
+
+#### sendrawtransaction
+
+Send a serialized, hex-encoded raw transactions.
+
+```sh
+$ ./bitcoin-cli sendrawtransaction <transaction>
+```
+
+```sh
+$ ./bitcoin-cli sendrawtransaction 0200000000010160d34fd758795058a9106ee155eb3e29c8aed5d9608643892466e8878ab54fc100000000000f00000001a0541b0400000000160014e9988c350aaa7a21367aea483c59f072962496950447304402201afe0d73685ba3592441370f15fca132596b186cbf30956507a3cdc2b9856ab602205008c4b596f6cee999f3f295e550d157725810ff7319e203ac6e34de7861d996012102d1f480e3ef0ca342c41bcd5a1e33765e6891281b829bffa32c19e920ca5a446c005963a820b497bc34525dc870c64f1bf45fe1e2bb8f663ac228b0db0a2aeec949c8a494468876a914a453eb499bcd75de0ff3c5a6d60850bcadae88bd675fb27576a914e9988c350aaa7a21367aea483c59f072962496956888ac00000000 
+```
+
+#### decoderawtransaction
+
+Decode a serialized, hex-encoded transactions into a JSON object.
+
+```sh
+$ ./bitcoin-cli decoderawtransaction <raw transaction>
+```
+
+```sh
+$ ./bitcoin-cli decoderawtransaction 0200000000010160d34fd758795058a9106ee155eb3e29c8aed5d9608643892466e8878ab54fc100000000000f00000001a0541b0400000000160014e9988c350aaa7a21367aea483c59f072962496950447304402201afe0d73685ba3592441370f15fca132596b186cbf30956507a3cdc2b9856ab602205008c4b596f6cee999f3f295e550d157725810ff7319e203ac6e34de7861d996012102d1f480e3ef0ca342c41bcd5a1e33765e6891281b829bffa32c19e920ca5a446c005963a820b497bc34525dc870c64f1bf45fe1e2bb8f663ac228b0db0a2aeec949c8a494468876a914a453eb499bcd75de0ff3c5a6d60850bcadae88bd675fb27576a914e9988c350aaa7a21367aea483c59f072962496956888ac00000000 
+```
+
+#### decodescript
+
+Get a JSON object of a hex-encoded script.
+
+```sh
+$ ./bitcoin-cli decodescript <hex string>
+```
+
+```sh
+$ ./bitcoin-cli decodescript 63a8206bd66227651d0fe5c43863d7b29a4097e31dbf51e6603eee75947bff5e96ae438876a914a453eb499bcd75de0ff3c5a6d60850bcadae88bd675ab27576a914e9988c350aaa7a21367aea483c59f072962496956888ac 
+```
+
+
+#### gettransaction
+
+Get a JSON object of an in-wallet transaction.
+
+```sh
+$ ./bitcoin-cli gettransaction <tx id>
+```
+
+```sh
+$ ./bitcoin-cli gettransaction c14fb58a87e8662489438660d9d5aec8293eeb55e16e10a958507958d74fd360 
+```
