@@ -38,12 +38,18 @@ const config = {
     locales: ['en'],
   },
 
+  markdown: {
+    mermaid: true,
+  },
+
   plugins: [
     'docusaurus-plugin-sass',
     ['./extensions/sa', {
       domain: 'sa.bitcoindocs.org'
     }],
   ],
+
+  themes: ['@docusaurus/theme-mermaid'],
 
   presets: [
     [
