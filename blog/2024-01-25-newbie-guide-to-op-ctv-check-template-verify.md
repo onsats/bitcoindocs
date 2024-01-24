@@ -64,6 +64,9 @@ created:
 
 ```py
 def create_template_hash(tx: CTransaction, nIn: int) -> bytes:
+    """This function takes a transaction and creates a hash from it. That hash is then evaluated
+    by CheckTemplateVerify and if it matches the transaction is valid.
+    """
     r = b""
     r += struct.pack("<i", tx.nVersion)
     r += struct.pack("<I", tx.nLockTime)
@@ -209,8 +212,8 @@ def get_txid(tx):
 
 
 def create_template_hash(tx: CTransaction, nIn: int) -> bytes:
-    """Most important function, this function takes a transaction template and creates an CheckTemplateVerify
-    compatible hash
+    """Most important function, this function takes a transaction and creates an hash which is then evaluated
+    by CheckTemplateVerify
     """
     r = b""
     r += struct.pack("<i", tx.nVersion)
