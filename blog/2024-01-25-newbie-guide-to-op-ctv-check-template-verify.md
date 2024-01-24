@@ -11,6 +11,7 @@ hide_table_of_contents: false
 ---
 
 import FeaturedImage from '@site/assets/Newbie-Guide-to-CheckTemplateVerify-OP_CTV.jpg';
+import MempoolImg from '@site/assets/op_ctv-nop4-stupid-simple-example-mempool.png';
 
 <Head>
   <meta property="og:image" content={`https://bitcoindocs.org${FeaturedImage}`} />
@@ -85,7 +86,7 @@ def create_template_hash(tx: CTransaction, nIn: int) -> bytes:
 
 ## Code example
 
-The goal of this example is to lock our script using OP_CTV. Coins will be locked based on our predefined conditions. For
+The goal of this example is to lock our coins using OP_CTV. Coins will be locked based on our predefined conditions. For
 demonstrative purposes we will lock our coins using a stupid simple™ template under which the only way to spend
 the coins will be to:
 - spend into an OP_RETURN saying "hello world"
@@ -337,5 +338,10 @@ $ ./bitcoin-cli sendrawtransaction 020000000168944cbabc6e5a5768df26604047c3b509e
 ```
 
 Notice the `11111` at the end, which is there to override the maxfee settings of our Bitcoin node: https://chainquery.com/bitcoin-cli/sendrawtransaction
+
+<img src={MempoolImg} alt="op_ctv mempool" style={{ width: "100%" }} />
+
+Voilà , our OP_CTV "protected" coins have been freed and donated to a miner.
+
 
 EOF
