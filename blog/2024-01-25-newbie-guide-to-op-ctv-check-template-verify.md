@@ -22,8 +22,8 @@ import FeaturedImage from '@site/assets/Newbie-Guide-to-CheckTemplateVerify-OP_C
 
 OP_CTV aka CheckTemplateVerify is an opcode proposal that enables locking coins based on predefined transaction
 attributes. It's like a special rule for locking your coins with a specific plan on how to spend them in the future.
-Imagine it like setting a combination lock on your coins, where only a certain key (or transaction) that matches your
-pre-set conditions can open it.
+Imagine it as setting a combination lock on your coins, where only a certain key (or transaction) matches your pre-set
+conditions can open it.
 
 <!--truncate-->
 
@@ -31,8 +31,8 @@ You can find more first-hand info about the OP_CTV under [BIP-119](https://githu
 
 ## What does OP_CTV lock onto?
 
-Think of OP_CTV as making a commitment. It's like making a promise that's consensus bound about how you're going to use
-your coins. This promise includes several details about the how the transaction spending your coins looks like:
+Think of OP_CTV as making a commitment. It's like making a promise that's consensus-bound about how you're going to use
+your coins. This promise includes several details about how the transaction spending your coins looks like:
 
 - Version: Which version of the transaction format you'll use.
 - Locktime: A timestamp or block number, saying when the transaction can be completed.
@@ -50,18 +50,18 @@ you allow someone to unlock the coins. When you want to spend your locked coins,
 template perfectly.
 
 :::info
-There is a common misconception amongst many that OP_CTV (CheckTemplateVerify) creates so called "recursive covenants".
-This suggests that once coins are locked using OP_CTV, they are forever trapped within a cycle of conditions
-that prevent them from ever being moved outside of these specific rules. In simpler terms, it's like saying once you put
-your coins into a certain type of box, they can never come out of boxes like that.
+There is a common misconception amongst many that OP_CTV (CheckTemplateVerify) creates so-called "recursive covenants".
+This suggests that once coins are locked using OP_CTV, they are forever trapped within a cycle of conditions that
+prevent them from ever being moved outside these specific rules. In simpler terms, it's like saying once you put your
+coins into a certain type of box, they can never come out of boxes like that.
 
-This is not true. CTV does not enable permanently confining coins within these conditions, because all steps how the 
-coins can be moved must be predefined. Conditions/restrictions how a coin can be spent can only be defined by the
+This is not true. CTV does not enable permanently confining coins within these conditions, because all steps on how the
+coins can be moved must be predefined. Conditions/ restrictions on how a coin can be spent can only be defined by the
 receiver.
 :::
 
-The template is represented by a hash (a long string of letters and numbers). Below code is an example how the hash is
-created:
+The template is represented by a hash (a long string of letters and numbers). Below code is an example of how the hash
+is created:
 
 ```py
 def create_template_hash(tx: CTransaction, nIn: int) -> bytes:
@@ -85,13 +85,13 @@ def create_template_hash(tx: CTransaction, nIn: int) -> bytes:
 
 ## Code example
 
-Goal of this example is to lock our script using OP_CTV. Coins will be locked based on our predefined conditions. For
+The goal of this example is to lock our script using OP_CTV. Coins will be locked based on our predefined conditions. For
 demonstrative purposes we will lock our coins using a stupid simple™ template under which the only way to spend
 the coins will be to:
 - spend into an OP_RETURN saying "hello world"
-- donate all of our locked coins to a miners 
+- donate all of our locked coins to miners 
 
-To follow along you must:
+To follow along, you must:
 - run [Bitcoin inquisitions](https://github.com/bitcoin-inquisition/bitcoin/) which has OP_CTV enabled
 - run Bitcoin regtest network with `-txindex` flag enabled
 - have basic understanding of `bitcoin-cli`
@@ -149,7 +149,7 @@ print(f"Funding address: {funding_address}")
 # Funding address: bcrt1q08alc0e5ua69scxhvyma568nvguqccrvah6ml0
 ```
 
-Once you have your funding wallet address send `0.069` coins to it and store the returned txid.
+Once you have your funding wallet address, send `0.069` coins to it and store the returned txid.
 
 ```sh
 $ ./bitcoin-cli --named sendtoaddress bcrt1q08alc0e5ua69scxhvyma568nvguqccrvah6ml0 amount=0.069 fee_rate=5
@@ -198,7 +198,7 @@ $ ./bitcoin-cli getrawtransaction 64983f7437eb80e48da7c4178387265d421e1948eee287
 
 ```
 
-The index is represented with the `n` value and  the value in my case was 1. Now keep the txid and the index as we will
+The index is represented by the `n` value, and the value in my case was 1. Now keep the txid and the index, as we will
 need it in order to spend the funds from the funding address into our OP_CTV.
 
 #### Helper functions
@@ -336,6 +336,6 @@ $ ./bitcoin-cli sendrawtransaction 020000000168944cbabc6e5a5768df26604047c3b509e
 9ef42401837d3f098827eec0fe6bd3c05e6dac025372fcbb3c0fcbb3ffb65b0c
 ```
 
-Notice the `11111` at the end, that is there to override the maxfee settings of our Bitcoin node: https://chainquery.com/bitcoin-cli/sendrawtransaction
+Notice the `11111` at the end, which is there to override the maxfee settings of our Bitcoin node: https://chainquery.com/bitcoin-cli/sendrawtransaction
 
 EOF
