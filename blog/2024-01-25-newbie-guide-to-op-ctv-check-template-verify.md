@@ -31,8 +31,8 @@ You can find more first-hand info about the OP_CTV under [BIP-119](https://githu
 
 ## What does OP_CTV lock onto?
 
-Think of OP_CTV as making a commitment. It's like making a promise about how you're going to use your coins. This
-promise includes several details about the future transaction:
+Think of OP_CTV as making a commitment. It's like making a promise that's consensus bound about how you're going to use
+your coins. This promise includes several details about the how the transaction spending your coins looks like:
 
 - Version: Which version of the transaction format you'll use.
 - Locktime: A timestamp or block number, saying when the transaction can be completed.
@@ -50,13 +50,14 @@ you allow someone to unlock the coins. When you want to spend your locked coins,
 template perfectly.
 
 :::info
-There is a common misconception amongst many that OP_CTV (CheckTemplateVerify) creates so called "recursive covenants" 
-in Bitcoin. This suggests that once coins are locked using OP_CTV, they are forever trapped within a cycle of conditions
+There is a common misconception amongst many that OP_CTV (CheckTemplateVerify) creates so called "recursive covenants".
+This suggests that once coins are locked using OP_CTV, they are forever trapped within a cycle of conditions
 that prevent them from ever being moved outside of these specific rules. In simpler terms, it's like saying once you put
 your coins into a certain type of box, they can never come out of boxes like that.
 
 This is not true. CTV does not enable permanently confining coins within these conditions, because all steps how the 
-coins can be moved must be predefined.
+coins can be moved must be predefined. Conditions/restrictions how a coin can be spent can only be defined by the
+receiver.
 :::
 
 The template is represented by a hash (a long string of letters and numbers). Below code is an example how the hash is
