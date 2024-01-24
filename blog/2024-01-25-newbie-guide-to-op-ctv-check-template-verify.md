@@ -1,6 +1,6 @@
 ---
 title: Newbie Guide to CheckTemplateVerify (OP_CTV)
-description: TODO
+description: Learn about CheckTemplateVerify (OP_CTV) opcode proposal that enables locking coins based on predefined transaction attributes.
 slug: newbie-guide-to-check-template-verify-op-ctv
 authors:
   - name: katsu
