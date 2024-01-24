@@ -93,10 +93,13 @@ the coins will be to:
 - donate all of our locked coins to miners 
 
 To follow along, you must:
+- have Python3 installed
 - run [Bitcoin inquisitions](https://github.com/bitcoin-inquisition/bitcoin/) which has OP_CTV enabled
 - run Bitcoin regtest network with `-txindex` flag enabled
 - have basic understanding of `bitcoin-cli`
 - install [python-bitcoinlib](https://pypi.org/project/python-bitcoinlib/) library for Python code
+
+The full code example can also be found in [this gist](https://gist.github.com/i0x0ff/a10cabee89a3cf9184511e8ea01b0ded).
 
 
 ### Lock coins using CTV
@@ -342,6 +345,5 @@ Notice the `11111` at the end, which is there to override the maxfee settings of
 <img src={MempoolImg} alt="op_ctv mempool" style={{ width: "100%" }} />
 
 Voilà , our OP_CTV "protected" coins have been freed and donated to a miner.
-
 
 EOF
