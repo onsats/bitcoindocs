@@ -1,0 +1,9 @@
+{
+    "grammarly.selectors": [
+        {
+            "language": "markdown",
+            "scheme": "file",
+            "pattern": "blog/2024-05-07-how-to-create-taproot-script-address-and-spend-a-script-path.md"
+        }
+    ]
+}
