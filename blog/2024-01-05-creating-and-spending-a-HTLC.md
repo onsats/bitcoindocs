@@ -4,7 +4,7 @@ description: Learn how to create an HTLC address, fund it and spend from it.
 slug: how-to-construct-an-htlc-conract-and-spend-it
 authors:
   - name: katsu
-    url: https://twitter.com/0x0ff_
+    url: https://twitter.com/katsucodes
     image_url: https://avatars.githubusercontent.com/u/77497807?v=4
 tags: [bitcoin-script, intermediate, python, htlc]
 hide_table_of_contents: false

@@ -4,7 +4,7 @@ description: Learn about CheckTemplateVerify (OP_CTV) opcode proposal that enabl
 slug: newbie-guide-to-check-template-verify-op-ctv
 authors:
   - name: katsu
-    url: https://twitter.com/0x0ff_
+    url: https://twitter.com/katsucodes
     image_url: https://avatars.githubusercontent.com/u/77497807?v=4
 tags: [bitcoin-script, intermediate, python, ctv]
 hide_table_of_contents: false
@@ -89,7 +89,7 @@ def create_template_hash(tx: CTransaction, nIn: int) -> bytes:
 The goal of this example is to lock our coins using OP_CTV. Coins will be locked based on our predefined conditions. For
 demonstrative purposes we will lock our coins using a stupid simple™ template under which the only way to spend
 the coins will be to:
-- spend into an OP_RETURN saying "hello world"
+- spend into an OP_RETURN saying "hello world" AND
 - donate all of our locked coins to miners 
 
 To follow along, you must:

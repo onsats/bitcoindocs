@@ -38,3 +38,7 @@
   --ifm-color-primary-lighter: #fac866;
   --ifm-color-primary-lightest: #fbd893;
 }
+
+.title_node_modules-\@docusaurus-theme-classic-lib-theme-BlogPostItem-Header-Title-styles-module {
+  font-size: 2.5rem !important;
+}
