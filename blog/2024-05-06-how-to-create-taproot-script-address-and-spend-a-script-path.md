@@ -46,7 +46,7 @@ Here are the equations that we will use:
 2. Script B: x + 2 = 4
 3. Script C: x + 1 = 5
 
-Each equation is its script and is "wrapped" in a TapLeaf. When there are multiple scripts defined we wrap those
+Each equation is its own script and is "wrapped" in a TapLeaf. When there are multiple scripts defined we wrap those
 into branches called TapBranch. See the below diagram as an example:
 
 
@@ -114,7 +114,8 @@ spendable if any of the 3 mathematical equations get solved.
   # script_b = Script([op_2, op_add, op_6, op_equal])
   # script_c = Script([op_2, op_add, op_3, op_equal])
 
-  # budil doesn have constants/variables defined to op codes, we use use their integer values
+  # buidl doesn't have constants/variables defined for op codes hence why
+  # we use use their integer values
   script_a = TapScript([81, 147, 82, 135])
   script_b = TapScript([82, 147, 84, 135])
   script_c = TapScript([81, 147, 85, 135])
